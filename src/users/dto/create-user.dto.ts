@@ -9,6 +9,5 @@ export class CreateUserDto {
     @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
     password: string;
 
-    @IsNotEmpty({ message: 'Tên không được để trống' })
     name: string;
 }

@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
 import bcrypt from 'node_modules/bcryptjs';
 
@@ -36,8 +36,16 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException('Id must be ObjectId');
+      }
+      const result = await this.userModel.findByIdAndUpdate(id, { ...updateUserDto }, { new: true })
+      return result
+    } catch (error) {
+      return error.message
+    }
   }
 
   remove(id: number) {
