@@ -27,8 +27,13 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    try {
+      const user = await this.userModel.findById(id)
+      return user;
+    } catch (error) {
+      return error.message
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
