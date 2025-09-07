@@ -14,8 +14,14 @@ export class AuthController {
 
     @UseGuards(LocalAuthGuard)
     @Post('auth/logout')
-    async logout(@Request() req) {
-        return req.logout();
+    async logout(@Request() req: AuthenticatedRequest) {
+        return new Promise((resolve, reject) => {
+            req.logout({}, (err) => {
+                if (err) {
+                    return reject({ message: 'Logout failed', error: err });
+                }
+                resolve({ message: 'Logout success' });
+            });
+        });
     }
-
 }
