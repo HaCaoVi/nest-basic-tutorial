@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
-import bcrypt from 'node_modules/bcryptjs';
+import bcrypt from "bcryptjs"
 
 @Injectable()
 export class UsersService {
@@ -25,6 +25,17 @@ export class UsersService {
 
   findAll() {
     return `This action returns all users`;
+  }
+
+  findUserByUsername = async (username: string) => {
+    try {
+      const user = await this.userModel.findOne({ email: username })
+
+      if (!user) return null
+      return user;
+    } catch (error) {
+      return null
+    }
   }
 
   async findOne(id: string) {
