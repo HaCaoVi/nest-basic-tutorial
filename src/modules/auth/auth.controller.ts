@@ -8,6 +8,7 @@ import { Public } from 'src/common/decorators/customize.decorator';
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
+
     @Public()
     @UseGuards(LocalAuthGuard)
     @Post('login')
