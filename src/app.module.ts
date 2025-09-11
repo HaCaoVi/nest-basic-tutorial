@@ -5,8 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './modules/auth/passport/jwt-auth.guard';
+import { TimezonePlugin } from './common/config/timezone.config';
 
 @Module({
   imports: [
@@ -17,7 +16,11 @@ import { JwtAuthGuard } from './modules/auth/passport/jwt-auth.guard';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>("MONGO_URL")
+        uri: configService.get<string>("MONGO_URL"),
+        connectionFactory: (connection) => {
+          connection.plugin(TimezonePlugin);
+          return connection;
+        },
       }),
       inject: [ConfigService]
     }),
@@ -25,11 +28,6 @@ import { JwtAuthGuard } from './modules/auth/passport/jwt-auth.guard';
     AuthModule
   ],
   controllers: [AppController],
-  providers: [AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
-    // },
-  ],
+  providers: [AppService],
 })
 export class AppModule { }
