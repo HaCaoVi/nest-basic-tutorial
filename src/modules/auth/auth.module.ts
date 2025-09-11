@@ -8,7 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/jwt.strategy';
 import ms from 'ms';
-import { SecurityHelper } from 'src/common/helpers/security.helper';
+import { SecurityHelper } from '@common/helpers/security.helper';
 
 @Module({
   imports: [

@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from './modules/users/user.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { TimezonePlugin } from './common/config/timezone.config';
+import { UsersModule } from '@modules/users/user.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { TimezonePlugin } from '@config/timezone.config';
 
 @Module({
   imports: [

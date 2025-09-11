@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './passport/local-auth.guard';
-import type { AuthenticatedRequest } from 'src/common/interfaces/authenticated-request.interface';
+import type { AuthenticatedRequest } from '@common/interfaces/authenticated-request.interface';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
-import { Public } from 'src/common/decorators/customize.decorator';
+import { Public } from '@common/decorators/customize.decorator';
 
 @Controller('auth')
 export class AuthController {

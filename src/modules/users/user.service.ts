@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { SecurityHelper } from 'src/common/helpers/security.helper';
+import { SecurityHelper } from '@common/helpers/security.helper';
 
 @Injectable()
 export class UsersService {
