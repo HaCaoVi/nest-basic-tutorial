@@ -11,6 +11,11 @@ async function bootstrap() {
 
   // app.useGlobalGuards(new JwtAuthGuard(reflector));
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({
+    "origin": `${configService.get("FE_ORIGIN_URL")}`,
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "credentials": "true",
+  });
 
   await app.listen(configService.get('PORT') ?? 3000);
 }

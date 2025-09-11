@@ -43,7 +43,7 @@ export class UsersService {
       const user = await this.userModel.findById(id)
       return user;
     } catch (error) {
-      return error.message
+      return null
     }
   }
 
