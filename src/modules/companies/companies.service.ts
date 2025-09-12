@@ -1,25 +1,25 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Company } from './schemas/company.schema';
-import { Model } from 'mongoose';
-import { CreateUserDto } from '@modules/users/dto/create-user.dto';
+import { Model, Types } from 'mongoose';
+import { IUser } from '@common/interfaces/customize.interface';
 
 @Injectable()
 export class CompaniesService {
+  private readonly logger = new Logger(CompaniesService.name);
   constructor(
-    @InjectModel(Company.name) private companyModel: Model<Company>
+    @InjectModel(Company.name) private companyModel: Model<Company>,
   ) { }
 
   async handleCreateCompany(authorId: string, createCompanyDto: CreateCompanyDto) {
     try {
-      const { address, description, name } = createCompanyDto
-      return this.companyModel.create({
-        name, address, description, createdBy: authorId
-      })
+      return this.companyModel.create({ ...createCompanyDto, createdBy: authorId });
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      if (error instanceof HttpException) throw error;
+      this.logger.error(error.message, error.stack);
+      throw new InternalServerErrorException("Something went wrong!");
     }
   }
 
@@ -31,11 +31,33 @@ export class CompaniesService {
     return `This action returns a #${id} company`;
   }
 
-  update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    return `This action updates a #${id} company`;
+  async update(author: IUser, id: string, updateCompanyDto: UpdateCompanyDto) {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException('Invalid company id');
+      }
+      const updated = await this.companyModel.findByIdAndUpdate(id, { ...updateCompanyDto, updatedBy: author._id }, { new: true });
+      if (!updated) throw new NotFoundException(`Company with id ${id} not found`);
+      return updated;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException("Something went wrong!");
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  async remove(user: IUser, id: string) {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException('Invalid company id');
+      }
+      const deleted = await this.companyModel.findByIdAndUpdate(id, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { new: true })
+      if (!deleted) throw new NotFoundException(`Company with id ${id} not found`);
+      return deleted;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(error.message, error.stack);
+      throw new InternalServerErrorException("Something went wrong!");
+    }
   }
 }

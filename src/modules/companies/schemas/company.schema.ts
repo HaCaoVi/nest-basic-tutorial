@@ -16,7 +16,7 @@ export class Company {
     @Prop({ required: true })
     description: string;
 
-    @Prop({ default: false })
+    @Prop({ default: false, index: true })
     isDeleted: boolean;
 
     @Prop()

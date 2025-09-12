@@ -27,12 +27,18 @@ export class CompaniesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companiesService.update(+id, updateCompanyDto);
+  update(
+    @User() user: IUser,
+    @Param('id') id: string,
+    @Body() updateCompanyDto: UpdateCompanyDto
+  ) {
+    return this.companiesService.update(user, id, updateCompanyDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.companiesService.remove(+id);
+  remove(
+    @User() user: IUser,
+    @Param('id') id: string) {
+    return this.companiesService.remove(user, id);
   }
 }
