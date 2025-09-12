@@ -28,15 +28,14 @@ export class User {
     @Prop({ default: false })
     isDeleted: boolean;
 
-    @Prop({ default: null })
-    deletedAt: Date;
-
     @Prop()
     createdAt: Date;
 
     @Prop()
     updatedAt: Date;
 
+    @Prop()
+    deletedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

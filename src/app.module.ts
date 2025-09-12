@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '@modules/users/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { TimezonePlugin } from '@config/timezone.config';
+import { CompaniesModule } from './modules/companies/companies.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { TimezonePlugin } from '@config/timezone.config';
       inject: [ConfigService]
     }),
     UsersModule,
-    AuthModule
+    AuthModule,
+    CompaniesModule
   ],
   controllers: [AppController],
   providers: [AppService],
