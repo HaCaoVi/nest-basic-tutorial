@@ -51,8 +51,8 @@ export class CompaniesService {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException('Invalid company id');
       }
-      const deleted = await this.companyModel.findByIdAndUpdate(id, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { new: true })
-      if (!deleted) throw new NotFoundException(`Company with id ${id} not found`);
+      const deleted = await this.companyModel.findOneAndUpdate({ _id: id, isDeleted: false }, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { new: true })
+      if (!deleted) throw new NotFoundException(`Company with id ${id} not found or already deleted`);
       return deleted;
     } catch (error) {
       if (error instanceof HttpException) throw error;
