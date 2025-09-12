@@ -12,7 +12,7 @@ export class CompaniesController {
   create(
     @Request() req: AuthenticatedRequest,
     @Body() createCompanyDto: CreateCompanyDto) {
-    return this.companiesService.handleCreateCompany(req.user.userId, createCompanyDto);
+    return this.companiesService.handleCreateCompany(req.user._id, createCompanyDto);
   }
 
   @Get()
