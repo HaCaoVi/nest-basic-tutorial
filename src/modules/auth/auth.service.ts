@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/user.service';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import { IUser } from '@common/interfaces/authenticated-request.interface';
+import { IUser } from '@common/interfaces/customize.interface';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +34,10 @@ export class AuthService {
         };
         return {
             access_token: this.jwtService.sign(payload),
+            _id,
+            email,
+            name,
+            role
         };
     }
 }

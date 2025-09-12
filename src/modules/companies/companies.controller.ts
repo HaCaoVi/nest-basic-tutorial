@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Request } from '@nes
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import type { AuthenticatedRequest } from '@common/interfaces/authenticated-request.interface';
+import type { IUser } from '@common/interfaces/customize.interface';
+import { User } from '@common/decorators/customize.decorator';
 
 @Controller('companies')
 export class CompaniesController {
@@ -10,9 +11,9 @@ export class CompaniesController {
 
   @Post()
   create(
-    @Request() req: AuthenticatedRequest,
+    @User() user: IUser,
     @Body() createCompanyDto: CreateCompanyDto) {
-    return this.companiesService.handleCreateCompany(req.user._id, createCompanyDto);
+    return this.companiesService.handleCreateCompany(user._id, createCompanyDto);
   }
 
   @Get()
