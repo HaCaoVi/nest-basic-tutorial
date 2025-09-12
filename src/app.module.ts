@@ -5,7 +5,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '@modules/users/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
-import { TimezonePlugin } from '@config/timezone.config';
 import { CompaniesModule } from './modules/companies/companies.module';
 
 @Module({
@@ -17,11 +16,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>("MONGO_URL"),
-        connectionFactory: (connection) => {
-          connection.plugin(TimezonePlugin);
-          return connection;
-        },
+        uri: configService.get<string>("MONGO_URL")
       }),
       inject: [ConfigService]
     }),

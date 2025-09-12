@@ -28,14 +28,16 @@ export class Company {
     @Prop()
     deletedAt: Date;
 
-    @Prop({ ref: 'User', })
-    createdBy: mongoose.Schema.Types.ObjectId
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+    createdBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ default: null })
-    updatedBy: mongoose.Schema.Types.ObjectId
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
+    updatedBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ default: null })
-    deletedBy: mongoose.Schema.Types.ObjectId
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
+    deletedBy: mongoose.Schema.Types.ObjectId;
+
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
+CompanySchema.index({ isDeleted: 1, createdAt: -1 });

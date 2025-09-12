@@ -4,7 +4,8 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Company } from './schemas/company.schema';
 import { Model, Types } from 'mongoose';
-import { IUser } from '@common/interfaces/customize.interface';
+import { IUser, PaginatedResult } from '@common/interfaces/customize.interface';
+import { normalizeFilters } from '@common/helpers/convert.helper';
 
 @Injectable()
 export class CompaniesService {
@@ -23,9 +24,46 @@ export class CompaniesService {
     }
   }
 
-  findAll() {
-    return `This action returns all companies`;
+  async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<Company>> {
+    try {
+      const filter = { isDeleted: false, ...normalizeFilters(filters) };
+
+      const skip = (current - 1) * pageSize;
+
+      const [totalItems, result] = await Promise.all([
+        this.companyModel.countDocuments(filter),
+        this.companyModel
+          .find(filter)
+          .skip(skip)
+          .limit(pageSize)
+          .sort({ createdAt: -1 })
+          .populate({
+            path: 'createdBy',
+            select: '-password -refreshToken',
+            options: { lean: true },
+          })
+          .lean<Company[]>()
+          .exec()
+      ]);
+
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      return {
+        meta: {
+          current,
+          pageSize,
+          pages: totalPages,
+          total: totalItems,
+        },
+        result,
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
+
 
   findOne(id: number) {
     return `This action returns a #${id} company`;

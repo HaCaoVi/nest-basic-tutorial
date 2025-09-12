@@ -4,3 +4,13 @@ export interface IUser {
     email: string,
     role: string,
 }
+
+export interface PaginatedResult<T> {
+    meta: {
+        current: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+    };
+    result: T[];
+}
