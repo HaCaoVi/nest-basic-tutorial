@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '@modules/auth/passport/jwt-auth.guard';
+import { TransformInterceptor } from '@common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,6 +12,8 @@ async function bootstrap() {
 
   app.useGlobalGuards(new JwtAuthGuard(reflector));
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalInterceptors(new TransformInterceptor(reflector));
+
   app.enableCors({
     "origin": `${configService.get("FE_ORIGIN_URL")}`,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",

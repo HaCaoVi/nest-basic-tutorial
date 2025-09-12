@@ -1,3 +1,9 @@
+export interface Response<T> {
+    statusCode: number;
+    message?: string;
+    data: T;
+}
+
 export interface IUser {
     _id: string,
     name: string,

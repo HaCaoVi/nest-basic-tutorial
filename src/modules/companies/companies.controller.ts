@@ -3,13 +3,14 @@ import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import type { IUser } from '@common/interfaces/customize.interface';
-import { User } from '@common/decorators/customize.decorator';
+import { ResponseMessage, User } from '@common/decorators/customize.decorator';
 
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) { }
 
   @Post()
+  @ResponseMessage("Created successfully")
   create(
     @User() user: IUser,
     @Body() createCompanyDto: CreateCompanyDto) {
