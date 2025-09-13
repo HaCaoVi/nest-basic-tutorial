@@ -19,15 +19,6 @@ export class Company {
     @Prop({ default: false, index: true })
     isDeleted: boolean;
 
-    @Prop()
-    createdAt: Date;
-
-    @Prop()
-    updatedAt: Date;
-
-    @Prop()
-    deletedAt: Date;
-
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     createdBy: mongoose.Schema.Types.ObjectId;
 
@@ -37,6 +28,14 @@ export class Company {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
     deletedBy: mongoose.Schema.Types.ObjectId;
 
+    @Prop()
+    createdAt: Date;
+
+    @Prop()
+    updatedAt: Date;
+
+    @Prop()
+    deletedAt: Date;
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
