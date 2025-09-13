@@ -3,7 +3,7 @@ import { LocalAuthGuard } from './passport/local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { Public, User } from '@common/decorators/customize.decorator';
-import type { IUser } from '@common/interfaces/customize.interface';
+import type { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 
 @Controller('auth')
@@ -13,7 +13,7 @@ export class AuthController {
     @Public()
     @UseGuards(LocalAuthGuard)
     @Post('login')
-    async login(@User() user: IUser) {
+    async login(@User() user: IInfoDecodeAccessToken) {
         return this.authService.login(user);
     }
 

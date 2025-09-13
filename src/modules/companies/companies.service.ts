@@ -4,7 +4,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Company } from './schemas/company.schema';
 import { Model, Types } from 'mongoose';
-import { IUser, PaginatedResult } from '@common/interfaces/customize.interface';
+import type { IInfoDecodeAccessToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
 
 @Injectable()
@@ -64,12 +64,19 @@ export class CompaniesService {
     }
   }
 
-
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  async findOne(id: string): Promise<Company> {
+    try {
+      const company = await this.companyModel.findById(id).select('-password -refreshToken').lean<Company>();
+      if (!company) throw new NotFoundException("Company not found!")
+      return company;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
-  async update(author: IUser, id: string, updateCompanyDto: UpdateCompanyDto) {
+  async update(author: IInfoDecodeAccessToken, id: string, updateCompanyDto: UpdateCompanyDto) {
     try {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException('Invalid company id');
@@ -84,7 +91,7 @@ export class CompaniesService {
     }
   }
 
-  async remove(user: IUser, id: string) {
+  async remove(user: IInfoDecodeAccessToken, id: string) {
     try {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException('Invalid company id');

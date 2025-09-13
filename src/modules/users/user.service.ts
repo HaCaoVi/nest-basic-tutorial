@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,6 +6,8 @@ import { Model, Types } from 'mongoose';
 import { AccountType, User } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
 import { JwtService } from '@nestjs/jwt';
+import type { IInfoDecodeAccessToken, PaginatedResult } from '@common/interfaces/customize.interface';
+import { normalizeFilters } from '@common/helpers/convert.helper';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +21,8 @@ export class UsersService {
 
   async handleRegister(user: RegisterUserDto) {
     try {
-      const { email, password } = user
+      const { email, password } = user;
+
       const isEmailExist = await this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL });
 
       if (isEmailExist) {
@@ -27,12 +30,10 @@ export class UsersService {
       }
 
       const hashPass = await this.securityHelper.hashPassword(password);
-      const newUser = await this.userModel.create({ ...user, password: hashPass, role: "USER", accountType: AccountType.LOCAL })
+      const newUser = await this.userModel.create({ ...user, password: hashPass, role: "USER", accountType: AccountType.LOCAL });
       return {
         id: newUser._id,
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
+        createdAt: newUser.createdAt
       };
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -41,18 +42,30 @@ export class UsersService {
     }
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const { email, name, password } = createUserDto
-    const hashPassword = await this.securityHelper.hashPassword(password)
-    const user = await this.userModel.create({ email, name, password: hashPassword })
-    return user;
+  async create(user: IInfoDecodeAccessToken, createUserDto: CreateUserDto) {
+    try {
+      const { email, password } = createUserDto
+
+      const isEmailExist = await this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL });
+
+      if (isEmailExist) {
+        throw new BadRequestException("Email already exists!");
+      }
+
+      const hashPass = await this.securityHelper.hashPassword(password);
+      const newUser = await this.userModel.create({ ...createUserDto, password: hashPass, role: "ADMIN", accountType: AccountType.LOCAL, createdBy: user._id })
+      return {
+        id: newUser._id,
+        createdAt: newUser.createdAt
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findUserByUsername = async (username: string) => {
+  async findUserByUsername(username: string) {
     try {
       const user = await this.userModel.findOne({ email: username })
 
@@ -63,28 +76,79 @@ export class UsersService {
     }
   }
 
-  async findOne(id: string) {
+  async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<User>> {
     try {
-      const user = await this.userModel.findById(id)
+      const filter = { isDeleted: false, ...normalizeFilters(filters) };
+
+      const skip = (current - 1) * pageSize;
+
+      const [totalItems, result] = await Promise.all([
+        this.userModel.countDocuments(filter),
+        this.userModel
+          .find(filter)
+          .skip(skip)
+          .limit(pageSize)
+          .sort({ createdAt: -1 })
+          .populate({
+            path: 'createdBy',
+            select: '-password -refreshToken',
+            options: { lean: true },
+          })
+          .lean<User[]>()
+          .exec()
+      ]);
+
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      return {
+        meta: {
+          current,
+          pageSize,
+          pages: totalPages,
+          total: totalItems,
+        },
+        result,
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
+  }
+
+  async findOne(id: string): Promise<User> {
+    try {
+      const user = await this.userModel.findById(id).select('-password -refreshToken').lean<User>();
+      if (!user) throw new NotFoundException("User not found!")
       return user;
     } catch (error) {
-      return null
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(user: IInfoDecodeAccessToken, id: string, updateUserDto: UpdateUserDto) {
     try {
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException('Id must be ObjectId');
-      }
-      const result = await this.userModel.findByIdAndUpdate(id, { ...updateUserDto }, { new: true })
-      return result
+      const updated = await this.userModel.updateOne({ _id: id }, { ...updateUserDto, updatedBy: user._id }, { runValidators: true })
+      if (!updated) throw new NotFoundException(`User with id ${id} not found`);
+      return updated;
     } catch (error) {
-      return error.message
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(user: IInfoDecodeAccessToken, id: string) {
+    try {
+      const result = await this.userModel.updateOne({ _id: id }, { deletedBy: user._id, isDeleted: true, deletedAt: new Date() }, { runValidators: true })
+      if (result.matchedCount === 0) throw new NotFoundException(`User with id ${id} not found`);
+      return result;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 }

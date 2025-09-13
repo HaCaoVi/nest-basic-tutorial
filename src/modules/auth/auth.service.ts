@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/user.service';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import { IUser } from '@common/interfaces/customize.interface';
+import { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class AuthService {
         return null;
     }
 
-    async login(user: IUser) {
+    async login(user: IInfoDecodeAccessToken) {
         const { _id, email, name, role } = user
         const payload = {
             sub: "Token login",
