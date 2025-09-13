@@ -19,7 +19,7 @@ export class Company {
     @Prop({ default: false, index: true })
     isDeleted: boolean;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
     createdBy: mongoose.Schema.Types.ObjectId;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })

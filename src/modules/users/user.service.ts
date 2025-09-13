@@ -1,17 +1,45 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { BadRequestException, HttpException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { AccountType, User } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private securityHelper: SecurityHelper
+    private securityHelper: SecurityHelper,
+    private jwtService: JwtService,
   ) { }
+
+  async handleRegister(user: RegisterUserDto) {
+    try {
+      const { email, password } = user
+      const isEmailExist = await this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL });
+
+      if (isEmailExist) {
+        throw new BadRequestException("Email already exists!");
+      }
+
+      const hashPass = await this.securityHelper.hashPassword(password);
+      const newUser = await this.userModel.create({ ...user, password: hashPass, role: "USER", accountType: AccountType.LOCAL })
+      return {
+        id: newUser._id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
+  }
 
   async create(createUserDto: CreateUserDto) {
     const { email, name, password } = createUserDto

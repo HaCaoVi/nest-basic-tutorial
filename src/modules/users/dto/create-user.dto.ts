@@ -1,13 +1,42 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, MinLength } from 'class-validator';
 
 export class CreateUserDto {
-    @IsNotEmpty({ message: 'Email không được để trống' })
-    @IsEmail({}, { message: 'Email không hợp lệ' })
+    @IsNotEmpty({ message: 'Email must not be empty!' })
+    @IsEmail({}, { message: 'Email invalid!' })
     email: string;
 
-    @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
-    @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
+    @IsNotEmpty({ message: 'Password must not be empty!' })
+    @MinLength(6, { message: 'Password must be at least 6 characters' })
     password: string;
 
     name: string;
+}
+
+export enum Gender {
+    Male = 'Male',
+    Female = 'Female',
+    Other = 'Other',
+}
+
+export class RegisterUserDto {
+    @IsNotEmpty({ message: 'Name must not be empty!' })
+    name: string;
+
+    @IsNotEmpty({ message: 'Email must not be empty!' })
+    @IsEmail({}, { message: 'Email invalid!' })
+    email: string;
+
+    @IsNotEmpty({ message: 'Password must not be empty!' })
+    @MinLength(6, { message: 'Password must be at least 6 characters' })
+    password: string;
+
+    @IsNotEmpty({ message: 'Age must not be empty!' })
+    age: number;
+
+    @IsNotEmpty({ message: 'Gender must not be empty!' })
+    @IsEnum(Gender, { message: 'Gender must be Male, Female, or Other' })
+    gender: string;
+
+    @IsNotEmpty({ message: 'Address must not be empty!' })
+    address: string;
 }
