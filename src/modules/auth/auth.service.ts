@@ -6,6 +6,8 @@ import { SecurityHelper } from '@common/helpers/security.helper';
 import { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
+import type { Response } from 'express';
+import ms from 'ms';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +34,7 @@ export class AuthService {
         })
     }
 
-    async login(user: IInfoDecodeAccessToken) {
+    async login(user: IInfoDecodeAccessToken, res: Response) {
         const { _id, email, name, role } = user
         const payload = {
             sub: "Token login",
@@ -43,10 +45,15 @@ export class AuthService {
             role
         };
 
-        const refresh_token = await this.createRefreshToken(payload)
+        const refresh_token = await this.createRefreshToken(payload);
+
+        await this.usersService.updateUserToken(_id, refresh_token);
+        res.cookie('refresh_token', refresh_token, {
+            httpOnly: true,
+            maxAge: +ms(this.configService.get<string>("JWT_REFRESH_EXPIRE") as ms.StringValue)
+        })
         return {
             access_token: this.jwtService.sign(payload),
-            refresh_token,
             user: {
                 _id,
                 email,

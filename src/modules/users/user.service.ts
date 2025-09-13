@@ -161,4 +161,14 @@ export class UsersService {
       throw new InternalServerErrorException('Something went wrong!');
     }
   }
+
+  async updateUserToken(id: string, refreshToken: string) {
+    try {
+      return this.userModel.updateOne({ _id: id }, { refreshToken })
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
+  }
 }
