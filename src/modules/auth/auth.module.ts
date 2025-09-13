@@ -17,9 +17,9 @@ import { SecurityHelper } from '@common/helpers/security.helper';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_TOKEN'),
+        secret: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         signOptions: {
-          expiresIn: ms(configService.get('JWT_ACCESS_EXPIRED') as number),
+          expiresIn: configService.get<string>('JWT_ACCESS_EXPIRE'),
         },
       }),
       inject: [ConfigService],

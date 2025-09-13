@@ -14,16 +14,6 @@ import { CompaniesModule } from '@modules/companies/companies.module';
     CompaniesModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     SecurityHelper,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_REFRESH_TOKEN'),
-        signOptions: {
-          expiresIn: ms(configService.get('JWT_REFRESH_EXPIRED') as number),
-        },
-      }),
-      inject: [ConfigService],
-    }),
   ],
   controllers: [UsersController],
   providers: [UsersService, SecurityHelper],

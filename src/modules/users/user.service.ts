@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { AccountType, User } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import { JwtService } from '@nestjs/jwt';
 import type { IInfoDecodeAccessToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
 import { CompaniesService } from '@modules/companies/companies.service';
@@ -17,7 +16,6 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private securityHelper: SecurityHelper,
-    private jwtService: JwtService,
     private companyService: CompaniesService,
   ) { }
 

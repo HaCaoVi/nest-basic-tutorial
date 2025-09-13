@@ -13,6 +13,7 @@ export class AuthController {
     @Public()
     @UseGuards(LocalAuthGuard)
     @Post('login')
+    @ResponseMessage("Login Successfully")
     async login(@User() user: IInfoDecodeAccessToken) {
         return this.authService.login(user);
     }
