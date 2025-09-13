@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
-import { Public, User } from '@common/decorators/customize.decorator';
+import { Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
 import type { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 
@@ -18,6 +18,7 @@ export class AuthController {
     }
 
     @Public()
+    @ResponseMessage("Register Successfully")
     @Post("register")
     async register(@Body() registerUserDto: RegisterUserDto) {
         return this.authService.register(registerUserDto)

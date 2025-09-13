@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
-import { Public, User } from '@common/decorators/customize.decorator';
+import { Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
 import type { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
 import { ParseObjectIdPipe } from '@common/pipes/parse-objectid.pipe';
 
@@ -11,6 +11,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
+  @ResponseMessage("Created Successfully")
   create(
     @User() user: IInfoDecodeAccessToken,
     @Body() createUserDto: any

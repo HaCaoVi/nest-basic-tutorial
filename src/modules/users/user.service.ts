@@ -8,6 +8,7 @@ import { SecurityHelper } from '@common/helpers/security.helper';
 import { JwtService } from '@nestjs/jwt';
 import type { IInfoDecodeAccessToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
+import { CompaniesService } from '@modules/companies/companies.service';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     private securityHelper: SecurityHelper,
     private jwtService: JwtService,
+    private companyService: CompaniesService,
   ) { }
 
   async handleRegister(user: RegisterUserDto) {
@@ -44,7 +46,17 @@ export class UsersService {
 
   async create(user: IInfoDecodeAccessToken, createUserDto: CreateUserDto) {
     try {
-      const { email, password } = createUserDto
+      const { email, password, company } = createUserDto
+
+      if (!Types.ObjectId.isValid(company)) {
+        throw new BadRequestException(`Company Invalid ObjectId: ${company}`);
+      }
+
+      const isCompanyExist = await this.companyService.isCompanyExist(company);
+
+      if (!isCompanyExist) {
+        throw new NotFoundException(`Company with id ${company} not found`);
+      }
 
       const isEmailExist = await this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL });
 
@@ -119,7 +131,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userModel.findById(id).select('-password -refreshToken').lean<User>();
-      if (!user) throw new NotFoundException("User not found!")
+      if (!user) throw new NotFoundException(`User with id ${id} not found`);
       return user;
     } catch (error) {
       this.logger.error(error.message, error.stack);

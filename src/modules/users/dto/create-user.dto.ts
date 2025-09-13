@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, Max, Min, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, Max, Min, MinLength } from 'class-validator';
 
 export enum Gender {
     Male = 'Male',
@@ -30,7 +30,7 @@ export class CreateUserDto {
     @IsNotEmpty({ message: 'Address must not be empty!' })
     address: string;
 
-    @IsNotEmpty({ message: 'Address must not be empty!' })
+    @IsOptional()
     company: string;
 }
 
