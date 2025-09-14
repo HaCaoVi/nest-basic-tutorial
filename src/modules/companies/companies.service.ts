@@ -4,7 +4,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Company } from './schemas/company.schema';
 import { Model, Types } from 'mongoose';
-import type { IInfoDecodeAccessToken, PaginatedResult } from '@common/interfaces/customize.interface';
+import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
 
 @Injectable()
@@ -76,7 +76,7 @@ export class CompaniesService {
     }
   }
 
-  async update(author: IInfoDecodeAccessToken, id: string, updateCompanyDto: UpdateCompanyDto) {
+  async update(author: IInfoDecodeToken, id: string, updateCompanyDto: UpdateCompanyDto) {
     try {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException('Invalid company id');
@@ -91,7 +91,7 @@ export class CompaniesService {
     }
   }
 
-  async remove(user: IInfoDecodeAccessToken, id: string) {
+  async remove(user: IInfoDecodeToken, id: string) {
     try {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException('Invalid company id');

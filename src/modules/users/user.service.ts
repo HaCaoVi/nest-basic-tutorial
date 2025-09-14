@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { AccountType, User } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import type { IInfoDecodeAccessToken, PaginatedResult } from '@common/interfaces/customize.interface';
+import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
 import { CompaniesService } from '@modules/companies/companies.service';
 
@@ -42,7 +42,7 @@ export class UsersService {
     }
   }
 
-  async create(user: IInfoDecodeAccessToken, createUserDto: CreateUserDto) {
+  async create(user: IInfoDecodeToken, createUserDto: CreateUserDto) {
     try {
       const { email, password, company } = createUserDto
 
@@ -138,7 +138,7 @@ export class UsersService {
     }
   }
 
-  async update(user: IInfoDecodeAccessToken, id: string, updateUserDto: UpdateUserDto) {
+  async update(user: IInfoDecodeToken, id: string, updateUserDto: UpdateUserDto) {
     try {
       const updated = await this.userModel.updateOne({ _id: id }, { ...updateUserDto, updatedBy: user._id }, { runValidators: true })
       if (!updated) throw new NotFoundException(`User with id ${id} not found`);
@@ -150,7 +150,7 @@ export class UsersService {
     }
   }
 
-  async remove(user: IInfoDecodeAccessToken, id: string) {
+  async remove(user: IInfoDecodeToken, id: string) {
     try {
       const result = await this.userModel.updateOne({ _id: id }, { deletedBy: user._id, isDeleted: true, deletedAt: new Date() }, { runValidators: true })
       if (result.matchedCount === 0) throw new NotFoundException(`User with id ${id} not found`);
@@ -198,6 +198,18 @@ export class UsersService {
       if (updated.matchedCount === 0) throw new NotFoundException(`Token expired`);
       if (updated.modifiedCount === 0) this.logger.warn("Refresh token matched but not updated (same value)");
       return true
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
+  }
+
+  async handleLogout(userId: string) {
+    try {
+      const result = await this.userModel.updateOne({ _id: userId }, { refreshToken: "" })
+      if (result.matchedCount === 0) throw new BadRequestException(`Logout fail!`);
+      return result;
     } catch (error) {
       this.logger.error(error.message, error.stack);
       if (error instanceof HttpException) throw error;

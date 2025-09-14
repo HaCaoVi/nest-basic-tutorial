@@ -3,7 +3,7 @@ import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/user.service';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
+import { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
@@ -18,11 +18,11 @@ export class AuthService {
         private configService: ConfigService
     ) { }
 
-    async signAccessTokenJWT(payload: IInfoDecodeAccessToken) {
+    async signAccessTokenJWT(payload: IInfoDecodeToken) {
         return this.jwtService.sign(payload)
     }
 
-    async signRefreshTokenJWT(payload: IInfoDecodeAccessToken) {
+    async signRefreshTokenJWT(payload: IInfoDecodeToken) {
         return this.jwtService.sign(payload, {
             secret: this.configService.get<string>("JWT_REFRESH_TOKEN_SECRET"),
             expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRE")
@@ -51,7 +51,7 @@ export class AuthService {
         return null;
     }
 
-    async login(user: IInfoDecodeAccessToken, res: Response) {
+    async login(user: IInfoDecodeToken, res: Response) {
         const { _id, email, name, role } = user
         const payload = {
             sub: "Token login",
@@ -116,6 +116,16 @@ export class AuthService {
                     role
                 }
             };
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            throw new BadRequestException('Token invalid, please login again!');
+        }
+    }
+
+    async logout(res: Response, userId: string) {
+        try {
+            res.clearCookie("refresh_token")
+            return this.usersService.handleLogout(userId)
         } catch (error) {
             if (error instanceof HttpException) throw error;
             throw new BadRequestException('Token invalid, please login again!');

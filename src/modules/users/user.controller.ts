@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './user.service';
 import { Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
-import type { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
+import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 import { ParseObjectIdPipe } from '@common/pipes/parse-objectid.pipe';
 
 @Controller('users')
@@ -13,7 +13,7 @@ export class UsersController {
   @Post()
   @ResponseMessage("Created Successfully")
   create(
-    @User() user: IInfoDecodeAccessToken,
+    @User() user: IInfoDecodeToken,
     @Body() createUserDto: any
   ) {
     return this.usersService.create(user, createUserDto);
@@ -27,7 +27,7 @@ export class UsersController {
 
   @Patch(':id')
   update(
-    @User() user: IInfoDecodeAccessToken,
+    @User() user: IInfoDecodeToken,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(user, id, updateUserDto);
@@ -35,7 +35,7 @@ export class UsersController {
 
   @Delete(':id')
   remove(
-    @User() user: IInfoDecodeAccessToken,
+    @User() user: IInfoDecodeToken,
     @Param('id', ParseObjectIdPipe) id: string
   ) {
     return this.usersService.remove(user, id);

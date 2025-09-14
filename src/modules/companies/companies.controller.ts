@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Request, Query } fro
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import type { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
+import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 import { ResponseMessage, User } from '@common/decorators/customize.decorator';
 
 @Controller('companies')
@@ -12,7 +12,7 @@ export class CompaniesController {
   @Post()
   @ResponseMessage("Created successfully")
   create(
-    @User() user: IInfoDecodeAccessToken,
+    @User() user: IInfoDecodeToken,
     @Body() createCompanyDto: CreateCompanyDto) {
     return this.companiesService.handleCreateCompany(user._id.toString(), createCompanyDto);
   }
@@ -32,7 +32,7 @@ export class CompaniesController {
 
   @Patch(':id')
   update(
-    @User() user: IInfoDecodeAccessToken,
+    @User() user: IInfoDecodeToken,
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto
   ) {
@@ -41,7 +41,7 @@ export class CompaniesController {
 
   @Delete(':id')
   remove(
-    @User() user: IInfoDecodeAccessToken,
+    @User() user: IInfoDecodeToken,
     @Param('id') id: string) {
     return this.companiesService.remove(user, id);
   }

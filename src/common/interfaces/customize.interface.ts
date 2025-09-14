@@ -16,7 +16,7 @@ export interface PaginatedResult<T> {
     result: T[],
 }
 
-export interface IInfoDecodeAccessToken {
+export interface IInfoDecodeToken {
     _id: string,
     name: string,
     email: string,
