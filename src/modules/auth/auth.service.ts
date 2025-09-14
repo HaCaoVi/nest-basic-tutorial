@@ -45,7 +45,7 @@ export class AuthService {
     async validateUser(username: string, pass: string): Promise<any> {
         const user = await this.usersService.findUserByUsername(username);
         if (user) {
-            const isValidPassword = await this.securityHelper.comparePassword(pass, user.password);
+            const isValidPassword = await this.securityHelper.compareHashBcrypt(pass, user.password);
             if (isValidPassword) return user
         }
         return null;
@@ -89,6 +89,9 @@ export class AuthService {
             const user = await this.verifyRefreshTokenJWT(currentRefreshToken)
 
             const { _id, email, name, role } = user
+
+            await this.usersService.isRefreshTokenValid(_id, currentRefreshToken)
+
             const payload = {
                 sub: "Token login",
                 iss: "From server",
@@ -101,7 +104,7 @@ export class AuthService {
             const newRefreshToken = await this.signRefreshTokenJWT(payload);
             const access_token = await this.signAccessTokenJWT(payload);
 
-            await this.usersService.updateRefreshToken(currentRefreshToken, newRefreshToken);
+            await this.usersService.updateRefreshToken(_id, newRefreshToken);
             this.addRefreshTokenInCookie(res, newRefreshToken)
 
             return {

@@ -29,7 +29,7 @@ export class UsersService {
         throw new BadRequestException("Email already exists!");
       }
 
-      const hashPass = await this.securityHelper.hashPassword(password);
+      const hashPass = await this.securityHelper.hashBcrypt(password);
       const newUser = await this.userModel.create({ ...user, password: hashPass, role: "USER", accountType: AccountType.LOCAL });
       return {
         id: newUser._id,
@@ -62,7 +62,7 @@ export class UsersService {
         throw new BadRequestException("Email already exists!");
       }
 
-      const hashPass = await this.securityHelper.hashPassword(password);
+      const hashPass = await this.securityHelper.hashBcrypt(password);
       const newUser = await this.userModel.create({ ...createUserDto, password: hashPass, role: "ADMIN", accountType: AccountType.LOCAL, createdBy: user._id })
       return {
         id: newUser._id,
@@ -164,7 +164,8 @@ export class UsersService {
 
   async updateUserToken(id: string, refreshToken: string) {
     try {
-      return this.userModel.updateOne({ _id: id }, { refreshToken })
+      const hashToken = this.securityHelper.hashTokenSHA256(refreshToken)
+      return this.userModel.updateOne({ _id: id }, { refreshToken: hashToken })
     } catch (error) {
       this.logger.error(error.message, error.stack);
       if (error instanceof HttpException) throw error;
@@ -172,11 +173,27 @@ export class UsersService {
     }
   }
 
-  async updateRefreshToken(oldToken: string, newToken: string) {
+  async isRefreshTokenValid(userId: string, refreshToken: string) {
     try {
+      const user = await this.userModel.findById(userId).lean<User>();
+      if (!user) throw new NotFoundException(`User with id ${userId} not found`);
+      const isValid = user.refreshToken === this.securityHelper.hashTokenSHA256(refreshToken)
+      if (!isValid) throw new BadRequestException(`Token invalid!`);
+      return true
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
+  }
+
+  async updateRefreshToken(userId: string, newToken: string) {
+    try {
+      const hashToken = this.securityHelper.hashTokenSHA256(newToken)
+
       const updated = await this.userModel.updateOne(
-        { refreshToken: oldToken },
-        { $set: { refreshToken: newToken } }
+        { _id: userId },
+        { $set: { refreshToken: hashToken } }
       );
       if (updated.matchedCount === 0) throw new NotFoundException(`Token expired`);
       if (updated.modifiedCount === 0) this.logger.warn("Refresh token matched but not updated (same value)");
