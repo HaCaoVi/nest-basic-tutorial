@@ -171,4 +171,20 @@ export class UsersService {
       throw new InternalServerErrorException('Something went wrong!');
     }
   }
+
+  async updateRefreshToken(oldToken: string, newToken: string) {
+    try {
+      const updated = await this.userModel.updateOne(
+        { refreshToken: oldToken },
+        { $set: { refreshToken: newToken } }
+      );
+      if (updated.matchedCount === 0) throw new NotFoundException(`Token expired`);
+      if (updated.modifiedCount === 0) this.logger.warn("Refresh token matched but not updated (same value)");
+      return true
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
+  }
 }

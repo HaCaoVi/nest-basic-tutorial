@@ -23,6 +23,6 @@ export interface IInfoDecodeAccessToken {
     role: string,
     sub: string,
     iss: string,
-    iat: number,
-    exp: number
+    iat?: number,
+    exp?: number
 }

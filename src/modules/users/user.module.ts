@@ -4,16 +4,12 @@ import { UsersController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import ms from 'ms';
 import { CompaniesModule } from '@modules/companies/companies.module';
 
 @Module({
   imports: [
     CompaniesModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    SecurityHelper,
   ],
   controllers: [UsersController],
   providers: [UsersService, SecurityHelper],

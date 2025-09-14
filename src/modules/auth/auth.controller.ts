@@ -1,8 +1,7 @@
 import { Body, Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './passport/jwt-auth.guard';
-import { Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
+import { Cookies, Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
 import type { IInfoDecodeAccessToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 import type { Response } from 'express';
@@ -38,6 +37,15 @@ export class AuthController {
         return {
             user: userData
         };
+    }
+
+    @Get('refresh')
+    @ResponseMessage("Refresh Successfully")
+    refreshToken(
+        @Res({ passthrough: true }) res: Response,
+        @Cookies('refresh_token') refreshToken: string
+    ) {
+        return this.authService.refreshToken(res, refreshToken)
     }
 
     @Post('logout')
