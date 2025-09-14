@@ -21,4 +21,8 @@ export interface IInfoDecodeAccessToken {
     name: string,
     email: string,
     role: string,
+    sub: string,
+    iss: string,
+    iat: number,
+    exp: number
 }

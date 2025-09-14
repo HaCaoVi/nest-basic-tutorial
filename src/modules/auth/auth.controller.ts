@@ -29,13 +29,17 @@ export class AuthController {
         return this.authService.register(registerUserDto)
     }
 
-    // @UseGuards(JwtAuthGuard)
-    @Get('profile')
-    getProfile(@Request() req) {
-        return req.user;
+    @Get('account')
+    @ResponseMessage("User Information")
+    getProfile(
+        @User() user: IInfoDecodeAccessToken,
+    ) {
+        const { _id, iat, exp, iss, ...userData } = user;
+        return {
+            user: userData
+        };
     }
 
-    // @UseGuards(LocalAuthGuard)
     @Post('logout')
     async logout(@Request() req) {
         return new Promise((resolve, reject) => {
