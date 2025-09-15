@@ -26,7 +26,8 @@ export class CompaniesService {
 
   async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<Company>> {
     try {
-      const filter = { isDeleted: false, ...normalizeFilters(filters) };
+      const { sort, ...data } = filters
+      const filter = { isDeleted: false, ...normalizeFilters(data) };
 
       const skip = (current - 1) * pageSize;
 
@@ -36,7 +37,7 @@ export class CompaniesService {
           .find(filter)
           .skip(skip)
           .limit(pageSize)
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .populate({
             path: 'createdBy',
             select: '-password -refreshToken',

@@ -20,7 +20,7 @@ async function bootstrap() {
   app.enableCors({
     "origin": `${configService.get("FE_ORIGIN_URL")}`,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "credentials": "true",
+    "credentials": true,
   });
 
   app.setGlobalPrefix('api');

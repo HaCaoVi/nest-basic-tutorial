@@ -45,8 +45,8 @@ export class UsersService {
   async create(user: IInfoDecodeToken, createUserDto: CreateUserDto) {
     try {
       const { email, password, company } = createUserDto
-
-      if (!Types.ObjectId.isValid(company)) {
+      const { _id } = company as any
+      if (!Types.ObjectId.isValid(_id)) {
         throw new BadRequestException(`Company Invalid ObjectId: ${company}`);
       }
 
@@ -77,7 +77,7 @@ export class UsersService {
 
   async findUserByUsername(username: string) {
     try {
-      const user = await this.userModel.findOne({ email: username })
+      const user = await this.userModel.findOne({ email: username, accountType: AccountType.LOCAL })
 
       if (!user) return null
       return user;
@@ -88,7 +88,9 @@ export class UsersService {
 
   async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<User>> {
     try {
-      const filter = { isDeleted: false, ...normalizeFilters(filters) };
+      const { sort, ...data } = filters
+
+      const filter = { isDeleted: false, ...normalizeFilters(data) };
 
       const skip = (current - 1) * pageSize;
 
@@ -98,10 +100,9 @@ export class UsersService {
           .find(filter)
           .skip(skip)
           .limit(pageSize)
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .populate({
-            path: 'createdBy',
-            select: '-password -refreshToken',
+            path: 'company',
             options: { lean: true },
           })
           .lean<User[]>()

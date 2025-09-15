@@ -39,6 +39,7 @@ export class AuthController {
         };
     }
 
+    @Public()
     @Get('refresh')
     @ResponseMessage("Refresh Successfully")
     refreshToken(
