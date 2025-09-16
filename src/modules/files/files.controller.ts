@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, ParseFilePipeBuilder } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from '@common/decorators/customize.decorator';
+// import { UploadConfig } from '@modules/files/upload.config';
 
 @Controller('files')
 export class FilesController {
@@ -15,16 +16,26 @@ export class FilesController {
     console.log(file);
   }
 
+  // @Public()
+  // @Post('upload-video')
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadVideo(
+  //   @UploadedFile(
+  //     createUploadPipe(UploadConfig.video.fileType, UploadConfig.video.maxSize)
+  //   )
+  //   file: Express.Multer.File,
+  // ) {
+  //   return {
+  //     success: true,
+  //     type: 'video',
+  //     data: {
+  //       filename: file.originalname,
+  //       mimetype: file.mimetype,
+  //       size: file.size,
+  //     },
+  //   };
+  // }
 
-  @Get()
-  findAll() {
-    return this.filesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.filesService.findOne(+id);
-  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateFileDto: UpdateFileDto) {

@@ -1,6 +1,8 @@
 
+import { User } from '@common/decorators/customize.decorator';
 import { SoftDeleteModel } from '@common/interfaces/customize.interface';
 import { softDeletePlugin } from '@common/plugins/soft-delete.plugin';
+import { Company } from '@modules/companies/schemas/company.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
@@ -15,7 +17,7 @@ export class Job {
     @Prop({ type: [String], required: true })
     skills: string[];
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Company.name, required: true })
     company: mongoose.Schema.Types.ObjectId;
 
     @Prop()
@@ -48,13 +50,13 @@ export class Job {
     @Prop()
     deletedAt: Date;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
     createdBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
     updatedBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
     deletedBy: mongoose.Schema.Types.ObjectId;
 
     @Prop()
