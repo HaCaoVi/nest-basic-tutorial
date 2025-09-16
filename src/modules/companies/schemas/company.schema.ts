@@ -1,4 +1,6 @@
 
+import { SoftDeleteModel } from '@common/interfaces/customize.interface';
+import { softDeletePlugin } from '@common/plugins/soft-delete.plugin';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
@@ -40,3 +42,6 @@ export class Company {
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
 CompanySchema.index({ isDeleted: 1, createdAt: -1 });
+
+CompanySchema.plugin(softDeletePlugin);
+export type CompanyModelType = SoftDeleteModel<CompanyDocument>;

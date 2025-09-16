@@ -35,6 +35,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ResponseMessage("Updated Successfully")
   update(
     @User() user: IInfoDecodeToken,
     @Param('id', ParseObjectIdPipe) id: string,
@@ -43,6 +44,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ResponseMessage("Deleted Successfully")
   remove(
     @User() user: IInfoDecodeToken,
     @Param('id', ParseObjectIdPipe) id: string

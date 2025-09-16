@@ -1,9 +1,18 @@
-import { AccountType } from "@modules/users/schemas/user.schema";
-import { FlattenMaps, Types } from "mongoose";
+import { Model } from "mongoose";
+
 export interface Response<T> {
     statusCode: number,
     message?: string,
     data: T,
+}
+
+export interface SoftDeleteModel<T> extends Model<T> {
+    softDeleteOne(filter: any, deletedBy?: string): Promise<any>;
+    softDeleteMany(filter: any, deletedBy?: string): Promise<any>;
+    // restoreOne(filter: any): Promise<any>;
+    // restoreMany(filter: any): Promise<any>;
+    // findWithDeleted(filter?: any): Promise<T[]>;
+    // findOnlyDeleted(filter?: any): Promise<T[]>;
 }
 
 export interface PaginatedResult<T> {

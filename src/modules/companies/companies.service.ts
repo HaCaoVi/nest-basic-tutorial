@@ -3,7 +3,8 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Company } from './schemas/company.schema';
-import { Model, Types } from 'mongoose';
+import type { CompanyModelType } from './schemas/company.schema';
+import { Types } from 'mongoose';
 import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
 
@@ -11,7 +12,7 @@ import { normalizeFilters } from '@common/helpers/convert.helper';
 export class CompaniesService {
   private readonly logger = new Logger(CompaniesService.name);
   constructor(
-    @InjectModel(Company.name) private companyModel: Model<Company>,
+    @InjectModel(Company.name) private companyModel: CompanyModelType,
   ) { }
 
   async handleCreateCompany(authorId: string, createCompanyDto: CreateCompanyDto) {
@@ -26,15 +27,14 @@ export class CompaniesService {
 
   async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<Company>> {
     try {
-      const { sort, ...data } = filters
-      const filter = { isDeleted: false, ...normalizeFilters(data) };
+      const { sort, ...filter } = filters
 
       const skip = (current - 1) * pageSize;
 
       const [totalItems, result] = await Promise.all([
-        this.companyModel.countDocuments(filter),
+        this.companyModel.countDocuments(normalizeFilters(filter)),
         this.companyModel
-          .find(filter)
+          .find(normalizeFilters(filter))
           .skip(skip)
           .limit(pageSize)
           .sort(sort)
@@ -67,7 +67,13 @@ export class CompaniesService {
 
   async findOne(id: string): Promise<Company> {
     try {
-      const company = await this.companyModel.findById(id).select('-password -refreshToken').lean<Company>();
+      const company = await this.companyModel
+        .findById(id)
+        .populate({
+          path: 'createdBy',
+          select: '-password -refreshToken',
+          options: { lean: true },
+        }).lean<Company>();
       if (!company) throw new NotFoundException("Company not found!")
       return company;
     } catch (error) {
@@ -97,7 +103,8 @@ export class CompaniesService {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException('Invalid company id');
       }
-      const deleted = await this.companyModel.updateOne({ _id: id, isDeleted: false }, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { runValidators: true })
+      // const deleted = await this.companyModel.updateOne({ _id: id, isDeleted: false }, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { runValidators: true })
+      const deleted = await this.companyModel.softDeleteOne({ _id: id, isDeleted: false }, user._id)
       if (deleted.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found or already deleted`);
       return deleted;
     } catch (error) {

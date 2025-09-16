@@ -2,8 +2,9 @@ import { BadRequestException, HttpException, Injectable, InternalServerErrorExce
 import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { AccountType, User } from './schemas/user.schema';
+import type { UserModelType } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
 import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
@@ -14,7 +15,7 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: UserModelType,
     private securityHelper: SecurityHelper,
     private companyService: CompaniesService,
   ) { }
@@ -88,16 +89,14 @@ export class UsersService {
 
   async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<User>> {
     try {
-      const { sort, ...data } = filters
-
-      const filter = { isDeleted: false, ...normalizeFilters(data) };
+      const { sort, ...filter } = filters
 
       const skip = (current - 1) * pageSize;
 
       const [totalItems, result] = await Promise.all([
-        this.userModel.countDocuments(filter),
+        this.userModel.countDocuments(normalizeFilters(filter)),
         this.userModel
-          .find(filter)
+          .find(normalizeFilters(filter))
           .skip(skip)
           .limit(pageSize)
           .sort(sort)
@@ -153,7 +152,7 @@ export class UsersService {
 
   async remove(user: IInfoDecodeToken, id: string) {
     try {
-      const result = await this.userModel.updateOne({ _id: id }, { deletedBy: user._id, isDeleted: true, deletedAt: new Date() }, { runValidators: true })
+      const result = await this.userModel.softDeleteOne({ _id: id }, user._id)
       if (result.matchedCount === 0) throw new NotFoundException(`User with id ${id} not found`);
       return result;
     } catch (error) {

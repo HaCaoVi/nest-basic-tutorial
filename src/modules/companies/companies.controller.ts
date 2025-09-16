@@ -31,6 +31,7 @@ export class CompaniesController {
   }
 
   @Patch(':id')
+  @ResponseMessage("Updated Successfully")
   update(
     @User() user: IInfoDecodeToken,
     @Param('id') id: string,
@@ -40,6 +41,7 @@ export class CompaniesController {
   }
 
   @Delete(':id')
+  @ResponseMessage("Deleted Successfully")
   remove(
     @User() user: IInfoDecodeToken,
     @Param('id') id: string) {

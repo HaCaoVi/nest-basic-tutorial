@@ -1,4 +1,5 @@
 
+import { SoftDeleteModel } from '@common/interfaces/customize.interface';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
@@ -72,3 +73,5 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.index({ isDeleted: 1, createdAt: -1 });
 UserSchema.index({ email: 1, accountType: 1 }, { unique: true });
+
+export type UserModelType = SoftDeleteModel<UserDocument>;
