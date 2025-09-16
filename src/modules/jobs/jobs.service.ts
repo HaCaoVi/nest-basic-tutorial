@@ -4,9 +4,10 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Job } from './schemas/job.schema';
 import type { JobModelType } from './schemas/job.schema';
-import { IInfoDecodeToken } from '@common/interfaces/customize.interface';
+import { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { Types } from 'mongoose';
 import { CompaniesService } from '@modules/companies/companies.service';
+import { normalizeFilters } from '@common/helpers/convert.helper';
 @Injectable()
 export class JobsService {
   private readonly logger = new Logger(JobsService.name);
@@ -37,19 +38,80 @@ export class JobsService {
     }
   }
 
-  findAll() {
-    return `This action returns all jobs`;
+  async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<Job>> {
+    try {
+      const { sort, ...filter } = filters
+
+      const skip = (current - 1) * pageSize;
+
+      const [totalItems, result] = await Promise.all([
+        this.jobModel.countDocuments(normalizeFilters(filter)),
+        this.jobModel
+          .find(normalizeFilters(filter))
+          .skip(skip)
+          .limit(pageSize)
+          .sort(sort)
+          .populate({
+            path: 'company',
+            options: { lean: true },
+          })
+          .lean<Job[]>()
+          .exec()
+      ]);
+
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      return {
+        meta: {
+          current,
+          pageSize,
+          pages: totalPages,
+          total: totalItems,
+        },
+        result,
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} job`;
+  async findOne(id: string): Promise<Job> {
+    try {
+      const job = await this.jobModel.findById(id).select('-password -refreshToken').lean<Job>();
+      if (!job) throw new NotFoundException(`Job with id ${id} not found`);
+      return job;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
-  update(id: number, updateJobDto: UpdateJobDto) {
-    return `This action updates a #${id} job`;
+  async update(user: IInfoDecodeToken, id: string, updateJobDto: UpdateJobDto) {
+    try {
+      const updated = await this.jobModel.updateOne({ _id: id }, { ...updateJobDto, updatedBy: user._id }, { runValidators: true })
+      if (!updated) throw new NotFoundException(`Job with id ${id} not found`);
+      return updated;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} job`;
+  async remove(user: IInfoDecodeToken, id: string) {
+    try {
+      const result = await this.jobModel.softDeleteOne({ _id: id }, user._id)
+      if (result.matchedCount === 0) throw new NotFoundException(`Job with id ${id} not found`);
+      return {
+        deleted: "ok"
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 }

@@ -4,6 +4,7 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { ResponseMessage, User } from '@common/decorators/customize.decorator';
 import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('jobs')
 export class JobsController {
@@ -23,19 +24,25 @@ export class JobsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobsService.findOne(+id);
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.jobsService.findOne(id);
   }
 
   @Patch(':id')
   @ResponseMessage("Updated Successfully")
-  update(@Param('id') id: string, @Body() updateJobDto: UpdateJobDto) {
-    return this.jobsService.update(+id, updateJobDto);
+  update(
+    @User() user: IInfoDecodeToken,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateJobDto: UpdateJobDto
+  ) {
+    return this.jobsService.update(user, id, updateJobDto);
   }
 
   @Delete(':id')
   @ResponseMessage("Deleted Successfully")
-  remove(@Param('id') id: string) {
-    return this.jobsService.remove(+id);
+  remove(
+    @User() user: IInfoDecodeToken,
+    @Param('id', ParseObjectIdPipe) id: string) {
+    return this.jobsService.remove(user, id);
   }
 }
