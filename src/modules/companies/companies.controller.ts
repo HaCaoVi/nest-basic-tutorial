@@ -4,6 +4,7 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 import { ResponseMessage, User } from '@common/decorators/customize.decorator';
+import { ParseObjectIdPipe } from '@common/pipes/parse-objectid.pipe';
 
 @Controller('companies')
 export class CompaniesController {
@@ -26,7 +27,7 @@ export class CompaniesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.companiesService.findOne(id);
   }
 
@@ -34,7 +35,7 @@ export class CompaniesController {
   @ResponseMessage("Updated Successfully")
   update(
     @User() user: IInfoDecodeToken,
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto
   ) {
     return this.companiesService.update(user, id, updateCompanyDto);
@@ -44,7 +45,7 @@ export class CompaniesController {
   @ResponseMessage("Deleted Successfully")
   remove(
     @User() user: IInfoDecodeToken,
-    @Param('id') id: string) {
+    @Param('id', ParseObjectIdPipe) id: string) {
     return this.companiesService.remove(user, id);
   }
 }

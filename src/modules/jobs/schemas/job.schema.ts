@@ -57,11 +57,11 @@ export class Job {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
     deletedBy: mongoose.Schema.Types.ObjectId;
 
-    // @Prop()
-    // createdAt: Date;
+    @Prop()
+    createdAt: Date;
 
-    // @Prop()
-    // updatedAt: Date;
+    @Prop()
+    updatedAt: Date;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

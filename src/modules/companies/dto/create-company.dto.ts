@@ -1,3 +1,4 @@
+import { IsObjectId } from "@common/decorators/validate.decorator";
 import { IsNotEmpty } from "class-validator";
 
 export class CreateCompanyDto {
@@ -9,4 +10,8 @@ export class CreateCompanyDto {
 
     @IsNotEmpty({ message: 'Description must not be empty!' })
     description: string;
+
+    @IsNotEmpty({ message: 'Company must not be empty!' })
+    @IsObjectId({ message: 'Company must be a ObjectId!' })
+    company: string;
 }

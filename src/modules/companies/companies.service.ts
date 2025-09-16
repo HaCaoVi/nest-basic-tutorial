@@ -85,9 +85,6 @@ export class CompaniesService {
 
   async update(author: IInfoDecodeToken, id: string, updateCompanyDto: UpdateCompanyDto) {
     try {
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException('Invalid company id');
-      }
       const updated = await this.companyModel.updateOne({ _id: id }, { ...updateCompanyDto, updatedBy: author._id }, { runValidators: true });
       if (updated.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found`);
       return updated;
@@ -100,9 +97,6 @@ export class CompaniesService {
 
   async remove(user: IInfoDecodeToken, id: string) {
     try {
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException('Invalid company id');
-      }
       // const deleted = await this.companyModel.updateOne({ _id: id, isDeleted: false }, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { runValidators: true })
       const deleted = await this.companyModel.softDeleteOne({ _id: id, isDeleted: false }, user._id)
       if (deleted.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found or already deleted`);

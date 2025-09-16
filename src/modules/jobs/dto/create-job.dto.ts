@@ -6,10 +6,9 @@ import {
     IsNumber,
     IsPositive,
     IsDate,
-    IsOptional
 } from "class-validator";
 import { Type } from "class-transformer";
-import { IsBefore } from "@common/decorators/validate.decorator";
+import { IsBefore, IsObjectId } from "@common/decorators/validate.decorator";
 
 export class CreateJobDto {
     @IsNotEmpty({ message: 'Name must not be empty!' })
@@ -22,7 +21,7 @@ export class CreateJobDto {
     skills: string[];
 
     @IsNotEmpty({ message: 'Company must not be empty!' })
-    @IsString({ message: 'Company must be a string!' })
+    @IsObjectId({ message: 'Company must be a ObjectId!' })
     company: string;
 
     @IsNotEmpty({ message: 'Location must not be empty!' })
@@ -48,13 +47,13 @@ export class CreateJobDto {
     description: string;
 
     @IsNotEmpty({ message: 'StartDate must not be empty!' })
-    @Type(() => Date)  // class-transformer để parse string -> Date
+    @Type(() => Date)
     @IsDate({ message: 'StartDate must be a valid date!' })
+    @IsBefore("endDate", { message: "StartDate must not be after EndDate!" })
     startDate: Date;
 
     @IsNotEmpty({ message: 'EndDate must not be empty!' })
     @Type(() => Date)
     @IsDate({ message: 'EndDate must be a valid date!' })
-    @IsBefore("endDate", { message: "StartDate must not be after EndDate!" })
     endDate: Date;
 }

@@ -46,10 +46,6 @@ export class UsersService {
   async create(user: IInfoDecodeToken, createUserDto: CreateUserDto) {
     try {
       const { email, password, company } = createUserDto
-      const { _id } = company as any
-      if (!Types.ObjectId.isValid(_id)) {
-        throw new BadRequestException(`Company Invalid ObjectId: ${company}`);
-      }
 
       const isCompanyExist = await this.companyService.isCompanyExist(company);
 
