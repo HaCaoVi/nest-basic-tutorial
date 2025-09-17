@@ -12,7 +12,7 @@ export class Resume {
     @Prop({ required: true })
     email: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" })
     user: mongoose.Schema.Types.ObjectId;
 
     @Prop({ required: true })

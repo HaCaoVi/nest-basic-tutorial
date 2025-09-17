@@ -46,4 +46,11 @@ export class ResumesController {
   ) {
     return this.resumesService.remove(user, id);
   }
+
+  @Post('by-user')
+  resumeOfUser(
+    @User() user: IInfoDecodeToken,
+  ) {
+    return this.resumesService.resumeOfUser(user);
+  }
 }

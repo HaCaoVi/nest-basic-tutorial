@@ -6,6 +6,7 @@ import { Resume } from './schemas/resume.schema';
 import type { ResumeModelType } from './schemas/resume.schema';
 import { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class ResumesService {
@@ -94,7 +95,7 @@ export class ResumesService {
           select: '-password -refreshToken',
           options: { lean: true },
         }).lean<Resume>();
-      if (!resume) throw new NotFoundException("Company not found!")
+      if (!resume) throw new NotFoundException("Resume not found!")
       return resume;
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -120,7 +121,7 @@ export class ResumesService {
             ]
           },
           { runValidators: true });
-      if (updated.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found`);
+      if (updated.matchedCount === 0) throw new NotFoundException(`Resume with id ${id} not found`);
       return updated;
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -133,8 +134,20 @@ export class ResumesService {
     try {
       // const deleted = await this.companyModel.updateOne({ _id: id, isDeleted: false }, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { runValidators: true })
       const deleted = await this.resumeModel.softDeleteOne({ _id: id, isDeleted: false }, user._id)
-      if (deleted.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found or already deleted`);
+      if (deleted.matchedCount === 0) throw new NotFoundException(`Resume with id ${id} not found or already deleted`);
       return deleted;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(error.message, error.stack);
+      throw new InternalServerErrorException("Something went wrong!");
+    }
+  }
+
+  async resumeOfUser(user: IInfoDecodeToken) {
+    try {
+      const result = await this.resumeModel.find({ user: user._id }).lean()
+      if (!result) throw new NotFoundException(`Resume not found`);
+      return result;
     } catch (error) {
       if (error instanceof HttpException) throw error;
       this.logger.error(error.message, error.stack);
