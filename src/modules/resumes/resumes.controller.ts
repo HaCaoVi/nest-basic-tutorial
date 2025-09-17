@@ -4,6 +4,7 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { User } from '@common/decorators/customize.decorator';
 import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('resumes')
 export class ResumesController {
@@ -26,8 +27,8 @@ export class ResumesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.resumesService.findOne(+id);
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.resumesService.findOne(id);
   }
 
   @Patch(':id')

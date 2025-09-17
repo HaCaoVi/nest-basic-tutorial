@@ -1,4 +1,4 @@
-import { HttpException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -85,8 +85,22 @@ export class ResumesService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} resume`;
+  async findOne(id: string): Promise<Resume> {
+    try {
+      const resume = await this.resumeModel
+        .findById(id)
+        .populate({
+          path: 'createdBy',
+          select: '-password -refreshToken',
+          options: { lean: true },
+        }).lean<Resume>();
+      if (!resume) throw new NotFoundException("Company not found!")
+      return resume;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
   update(id: number, updateResumeDto: UpdateResumeDto) {
