@@ -5,9 +5,10 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { JwtAuthGuard } from '@modules/auth/passport/jwt-auth.guard';
 import { TransformInterceptor } from '@common/interceptors/transform.interceptor';
 import cookieParser from 'cookie-parser';
-
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);
 
@@ -28,7 +29,7 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: ['1', '2'],
   });
-
+  app.useStaticAssets(join(__dirname, '..', 'public'));
   await app.listen(configService.get('PORT') ?? 3000);
 }
 bootstrap();
