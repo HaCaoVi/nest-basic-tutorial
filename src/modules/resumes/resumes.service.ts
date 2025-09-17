@@ -105,7 +105,21 @@ export class ResumesService {
 
   async update(author: IInfoDecodeToken, id: string, updateResumeDto: UpdateResumeDto) {
     try {
-      const updated = await this.resumeModel.updateOne({ _id: id }, { ...updateResumeDto, updatedBy: author._id }, { runValidators: true });
+      const updated = await this.resumeModel
+        .updateOne(
+          { _id: id },
+          {
+            ...updateResumeDto,
+            updatedBy: author._id,
+            history: [
+              {
+                status: "PENDING",
+                updatedAt: new Date,
+                updatedBy: author._id
+              }
+            ]
+          },
+          { runValidators: true });
       if (updated.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found`);
       return updated;
     } catch (error) {
@@ -115,7 +129,16 @@ export class ResumesService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} resume`;
+  async remove(user: IInfoDecodeToken, id: string) {
+    try {
+      // const deleted = await this.companyModel.updateOne({ _id: id, isDeleted: false }, { deletedAt: new Date(), deletedBy: user._id, isDeleted: true }, { runValidators: true })
+      const deleted = await this.resumeModel.softDeleteOne({ _id: id, isDeleted: false }, user._id)
+      if (deleted.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found or already deleted`);
+      return deleted;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      this.logger.error(error.message, error.stack);
+      throw new InternalServerErrorException("Something went wrong!");
+    }
   }
 }
