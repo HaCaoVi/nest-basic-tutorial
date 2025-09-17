@@ -14,7 +14,7 @@ export class UsersController {
   @ResponseMessage("Created Successfully")
   create(
     @User() user: IInfoDecodeToken,
-    @Body() createUserDto: any
+    @Body() createUserDto: CreateUserDto
   ) {
     return this.usersService.create(user, createUserDto);
   }

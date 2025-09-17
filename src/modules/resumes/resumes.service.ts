@@ -16,7 +16,24 @@ export class ResumesService {
 
   async create(author: IInfoDecodeToken, createResumeDto: CreateResumeDto) {
     try {
-      return this.resumeModel.create({ ...createResumeDto, email: author.email, user: author._id, createdBy: author._id });
+      const resume = await this.resumeModel.create(
+        {
+          ...createResumeDto,
+          email: author.email,
+          user: author._id,
+          createdBy: author._id,
+          history: [
+            {
+              status: "PENDING",
+              updatedAt: new Date,
+              updatedBy: author._id
+            }
+          ]
+        });
+      return {
+        id: resume._id,
+        createdAt: resume.createdAt
+      };
     } catch (error) {
       if (error instanceof HttpException) throw error;
       this.logger.error(error.message, error.stack);

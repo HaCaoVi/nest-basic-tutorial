@@ -13,7 +13,7 @@ import { ResumesModule } from '@modules/resumes/resumes.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local'],
+      envFilePath: ['.env'],
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({

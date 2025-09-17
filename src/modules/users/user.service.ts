@@ -45,22 +45,18 @@ export class UsersService {
 
   async create(user: IInfoDecodeToken, createUserDto: CreateUserDto) {
     try {
-      const { email, password, company, ...rest } = createUserDto
+      const { email, password, ...rest } = createUserDto
 
-      const [isCompanyExist, isEmailExist] = await Promise.all([
-        this.companyService.isCompanyExist(company),
+      const [isEmailExist] = await Promise.all([
         this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL }),
       ]);
-
-      if (!isCompanyExist) {
-        throw new NotFoundException(`Company with id ${company} not found`);
-      }
 
       if (isEmailExist) {
         throw new BadRequestException("Email already exists!");
       }
       const hashPass = await this.securityHelper.hashBcrypt(password);
-      const newUser = await this.userModel.create({ ...rest, password: hashPass, role: "ADMIN", accountType: AccountType.LOCAL, createdBy: user._id })
+      const newUser = await this.userModel.create({ ...rest, email, password: hashPass, role: "ADMIN", accountType: AccountType.LOCAL, createdBy: user._id })
+
       return {
         id: newUser._id,
         createdAt: newUser.createdAt
