@@ -29,7 +29,7 @@ export class Job {
     @Prop()
     quantity: number;
 
-    @Prop({ enum: ['Intern', 'Junior', 'Mid', 'Senior', 'Lead'] })
+    @Prop({ enum: ['INTERN', 'JUNIOR', 'MID', 'SENIOR', 'LEAD'] })
     level: string;
 
     @Prop({ type: String, maxLength: 5000 })

@@ -20,13 +20,13 @@ export class JobsService {
     try {
       const { company } = createJobDto
 
-      const isCompanyExist = await this.companyService.isCompanyExist(company);
+      const isCompanyExist = await this.companyService.isCompanyExist(company._id);
 
       if (!isCompanyExist) {
         throw new NotFoundException(`Company with id ${company} not found or deleted`);
       }
 
-      const job = await this.jobModel.create({ ...createJobDto, createdBy: user._id });
+      const job = await this.jobModel.create({ ...createJobDto, company: company._id, createdBy: user._id });
       return {
         _id: job._id,
         createdAt: job.createdAt
@@ -79,7 +79,12 @@ export class JobsService {
 
   async findOne(id: string): Promise<Job> {
     try {
-      const job = await this.jobModel.findById(id).select('-password -refreshToken').lean<Job>();
+      const job = await this.jobModel
+        .findById(id)
+        .populate({
+          path: 'company',
+          options: { lean: true },
+        }).lean<Job>();
       if (!job) throw new NotFoundException(`Job with id ${id} not found`);
       return job;
     } catch (error) {
@@ -91,7 +96,8 @@ export class JobsService {
 
   async update(user: IInfoDecodeToken, id: string, updateJobDto: UpdateJobDto) {
     try {
-      const updated = await this.jobModel.updateOne({ _id: id }, { ...updateJobDto, updatedBy: user._id }, { runValidators: true })
+      const dataConfig = { ...updateJobDto, company: updateJobDto.company._id }
+      const updated = await this.jobModel.updateOne({ _id: id }, { ...dataConfig, updatedBy: user._id }, { runValidators: true })
       if (!updated) throw new NotFoundException(`Job with id ${id} not found`);
       return updated;
     } catch (error) {

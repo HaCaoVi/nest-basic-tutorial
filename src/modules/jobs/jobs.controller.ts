@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -20,8 +20,11 @@ export class JobsController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.jobsService.findAll();
+  findAll(
+    @Query() query: any
+  ) {
+    const { current, pageSize, ...filters } = query;
+    return this.jobsService.findAll(+current, +pageSize, filters);
   }
 
   @Public()

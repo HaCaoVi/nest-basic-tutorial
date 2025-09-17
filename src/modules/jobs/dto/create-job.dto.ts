@@ -6,6 +6,7 @@ import {
     IsNumber,
     IsPositive,
     IsDate,
+    IsOptional,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { IsBefore, IsObjectId } from "@common/decorators/validate.decorator";
@@ -20,9 +21,11 @@ export class CreateJobDto {
     @IsString({ each: true, message: 'Each skill must be a string!' })
     skills: string[];
 
-    @IsNotEmpty({ message: 'Company must not be empty!' })
-    @IsObjectId({ message: 'Company must be a ObjectId!' })
-    company: string;
+    // No check to match fe
+    // @IsNotEmpty({ message: 'Company must not be empty!' })
+    // @IsObjectId({ message: 'Company must be a ObjectId!' })
+    @IsOptional()
+    company: any;
 
     @IsNotEmpty({ message: 'Location must not be empty!' })
     @IsString({ message: 'Location must be a string!' })
