@@ -38,8 +38,11 @@ export class JobsService {
     }
   }
 
-  async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<Job>> {
+  async findAll(current: number, pageSize: number, filters: Record<string, any> = {}): Promise<PaginatedResult<Job>> {
     try {
+      if (!current) current = 1
+      if (!pageSize) pageSize = 10
+
       const { sort, ...filter } = filters
 
       const skip = (current - 1) * pageSize;

@@ -4,7 +4,8 @@ import { UpdateResumeDto } from './dto/update-resume.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Resume } from './schemas/resume.schema';
 import type { ResumeModelType } from './schemas/resume.schema';
-import { IInfoDecodeToken } from '@common/interfaces/customize.interface';
+import { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
+import { normalizeFilters } from '@common/helpers/convert.helper';
 
 @Injectable()
 export class ResumesService {
@@ -41,8 +42,47 @@ export class ResumesService {
     }
   }
 
-  findAll() {
-    return `This action returns all resumes`;
+  async findAll(current: number, pageSize: number, filters: Record<string, any> = {}): Promise<PaginatedResult<Resume>> {
+    try {
+      if (!current) current = 1
+      if (!pageSize) pageSize = 10
+
+      const { sort, ...filter } = filters
+
+      const skip = (current - 1) * pageSize;
+
+      const [totalItems, result] = await Promise.all([
+        this.resumeModel.countDocuments(normalizeFilters(filter)),
+        this.resumeModel
+          .find(normalizeFilters(filter))
+          .skip(skip)
+          .limit(pageSize)
+          .sort(sort)
+          .populate({
+            path: 'createdBy',
+            select: '-password -refreshToken',
+            options: { lean: true },
+          })
+          .lean<Resume[]>()
+          .exec()
+      ]);
+
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      return {
+        meta: {
+          current,
+          pageSize,
+          pages: totalPages,
+          total: totalItems,
+        },
+        result,
+      };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
   findOne(id: number) {

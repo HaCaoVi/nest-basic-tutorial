@@ -24,7 +24,6 @@ export class UsersController {
     @Query() query: any
   ) {
     const { current, pageSize, ...filters } = query;
-
     return this.usersService.findAll(current, pageSize, filters);
   }
 

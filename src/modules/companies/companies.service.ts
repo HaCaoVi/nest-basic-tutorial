@@ -25,8 +25,11 @@ export class CompaniesService {
     }
   }
 
-  async findAll(current = 1, pageSize = 10, filters: Record<string, any> = {}): Promise<PaginatedResult<Company>> {
+  async findAll(current: number, pageSize: number, filters: Record<string, any> = {}): Promise<PaginatedResult<Company>> {
     try {
+      if (!current) current = 1
+      if (!pageSize) pageSize = 10
+
       const { sort, ...filter } = filters
 
       const skip = (current - 1) * pageSize;
