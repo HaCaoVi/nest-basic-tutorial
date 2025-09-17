@@ -8,6 +8,7 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { JobsModule } from '@modules/jobs/jobs.module';
 import { FilesModule } from '@modules/files/files.module';
+import { ResumesModule } from '@modules/resumes/resumes.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { FilesModule } from '@modules/files/files.module';
     AuthModule,
     CompaniesModule,
     JobsModule,
-    FilesModule
+    FilesModule,
+    ResumesModule
   ],
   controllers: [AppController],
   providers: [AppService],
