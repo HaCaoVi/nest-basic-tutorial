@@ -2,13 +2,6 @@ import { IsObjectId } from '@common/decorators/validate.decorator';
 import { IsNotEmpty, IsString, } from 'class-validator';
 import mongoose from 'mongoose';
 
-export enum ResumeStatus {
-    PENDING = 'PENDING',
-    REVIEWING = 'REVIEWING',
-    APPROVED = 'APPROVED',
-    REJECTED = 'REJECTED',
-}
-
 export class CreateResumeDto {
     @IsNotEmpty({ message: 'URL must not be empty!' })
     @IsString({ message: 'URL must be a string!' })

@@ -103,8 +103,16 @@ export class ResumesService {
     }
   }
 
-  update(id: number, updateResumeDto: UpdateResumeDto) {
-    return `This action updates a #${id} resume`;
+  async update(author: IInfoDecodeToken, id: string, updateResumeDto: UpdateResumeDto) {
+    try {
+      const updated = await this.resumeModel.updateOne({ _id: id }, { ...updateResumeDto, updatedBy: author._id }, { runValidators: true });
+      if (updated.matchedCount === 0) throw new NotFoundException(`Company with id ${id} not found`);
+      return updated;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException("Something went wrong!");
+    }
   }
 
   remove(id: number) {

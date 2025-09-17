@@ -32,8 +32,11 @@ export class ResumesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResumeDto: UpdateResumeDto) {
-    return this.resumesService.update(+id, updateResumeDto);
+  update(
+    @User() user: IInfoDecodeToken,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateResumeDto: UpdateResumeDto) {
+    return this.resumesService.update(user, id, updateResumeDto);
   }
 
   @Delete(':id')
