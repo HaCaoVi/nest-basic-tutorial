@@ -1,5 +1,6 @@
 
 import { SoftDeleteModel } from '@common/interfaces/customize.interface';
+import { Company } from '@modules/companies/schemas/company.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
@@ -32,7 +33,7 @@ export class User {
     @Prop()
     address: string;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Company' })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Company" })
     company: mongoose.Schema.Types.ObjectId;
 
     @Prop({
@@ -50,13 +51,13 @@ export class User {
     @Prop({ default: false })
     isDeleted: boolean;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", default: null })
     createdBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", default: null })
     updatedBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", default: null })
     deletedBy: mongoose.Schema.Types.ObjectId;
 
     @Prop()

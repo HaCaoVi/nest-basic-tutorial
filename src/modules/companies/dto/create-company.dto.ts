@@ -11,7 +11,6 @@ export class CreateCompanyDto {
     @IsNotEmpty({ message: 'Description must not be empty!' })
     description: string;
 
-    @IsNotEmpty({ message: 'Company must not be empty!' })
-    @IsObjectId({ message: 'Company must be a ObjectId!' })
-    company: string;
+    @IsNotEmpty({ message: 'Logo must not be empty!' })
+    logo: string;
 }

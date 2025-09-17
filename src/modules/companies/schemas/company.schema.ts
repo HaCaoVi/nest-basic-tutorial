@@ -1,7 +1,7 @@
 
-import { User } from '@common/decorators/customize.decorator';
 import { SoftDeleteModel } from '@common/interfaces/customize.interface';
 import { softDeletePlugin } from '@common/plugins/soft-delete.plugin';
+import { User } from '@modules/users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
@@ -19,16 +19,19 @@ export class Company {
     @Prop({ required: true })
     description: string;
 
+    @Prop({ required: true })
+    logo: string
+
     @Prop({ default: false, index: true })
     isDeleted: boolean;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", default: null })
     createdBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", default: null })
     updatedBy: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", default: null })
     deletedBy: mongoose.Schema.Types.ObjectId;
 
     @Prop()

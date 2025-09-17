@@ -3,7 +3,7 @@ import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
-import { ResponseMessage, User } from '@common/decorators/customize.decorator';
+import { Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
 import { ParseObjectIdPipe } from '@common/pipes/parse-objectid.pipe';
 
 @Controller('companies')
@@ -18,6 +18,7 @@ export class CompaniesController {
     return this.companiesService.handleCreateCompany(user._id.toString(), createCompanyDto);
   }
 
+  @Public()
   @Get()
   findAll(
     @Query() query: any
@@ -26,6 +27,7 @@ export class CompaniesController {
     return this.companiesService.findAll(+current, +pageSize, filters);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.companiesService.findOne(id);

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { ResponseMessage, User } from '@common/decorators/customize.decorator';
+import { Public, ResponseMessage, User } from '@common/decorators/customize.decorator';
 import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
@@ -18,11 +18,13 @@ export class JobsController {
     return this.jobsService.create(user, createJobDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.jobsService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.jobsService.findOne(id);
