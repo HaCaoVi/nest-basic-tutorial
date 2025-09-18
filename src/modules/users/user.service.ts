@@ -70,7 +70,12 @@ export class UsersService {
 
   async findUserByUsername(username: string) {
     try {
-      const user = await this.userModel.findOne({ email: username, accountType: AccountType.LOCAL })
+      const user = await this.userModel
+        .findOne({ email: username, accountType: AccountType.LOCAL })
+        .populate({
+          path: "role",
+          select: "_id name"
+        })
 
       if (!user) return null
       return user;
@@ -123,7 +128,13 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> {
     try {
-      const user = await this.userModel.findById(id).select('-password -refreshToken').lean<User>();
+      const user = await this.userModel.findById(id)
+        .select('-password -refreshToken')
+        .populate({
+          path: "role",
+          select: "_id name"
+        })
+        .lean<User>();
       if (!user) throw new NotFoundException(`User with id ${id} not found`);
       return user;
     } catch (error) {
@@ -147,6 +158,13 @@ export class UsersService {
 
   async remove(user: IInfoDecodeToken, id: string) {
     try {
+      const checkUser = await this.userModel.findById(id);
+
+      if (checkUser?.email === "admin@gmail.com") {
+        throw new BadRequestException("Can't delete this account")
+      }
+
+
       const result = await this.userModel.softDeleteOne({ _id: id }, user._id)
       if (result.matchedCount === 0) throw new NotFoundException(`User with id ${id} not found`);
       return result;

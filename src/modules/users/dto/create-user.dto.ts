@@ -34,6 +34,10 @@ export class CreateUserDto {
     @IsNotEmpty({ message: 'Company must not be empty!' })
     @IsObjectId({ message: 'Company must be a ObjectId!' })
     company: string;
+
+    @IsNotEmpty({ message: 'Role must not be empty!' })
+    @IsObjectId({ message: 'Role must be a ObjectId!' })
+    role: string;
 }
 
 

@@ -42,8 +42,8 @@ export class User {
     })
     accountType: AccountType
 
-    @Prop()
-    role: string
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Role" })
+    role: mongoose.Schema.Types.ObjectId;
 
     @Prop()
     refreshToken: string;

@@ -107,6 +107,12 @@ export class RolesService {
 
   async remove(user: IInfoDecodeToken, id: string) {
     try {
+      const checkRole = await this.roleModel.findById(id);
+
+      if (checkRole?.name === "ADMIN") {
+        throw new BadRequestException("Can't delete role admin")
+      }
+
       const result = await this.roleModel.softDeleteOne({ _id: id }, user._id)
       if (result.matchedCount === 0) throw new NotFoundException(`Role with id ${id} not found`);
       return {
