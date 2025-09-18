@@ -7,6 +7,7 @@ import type { RoleModelType } from './schemas/role.schema';
 import { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
 import { ADMIN_ROLE } from '@modules/databases/sample';
+import { buildPopulateConfigFromStrings } from '@common/helpers/mongoose-populate.helper';
 
 @Injectable()
 export class RolesService {
@@ -39,8 +40,8 @@ export class RolesService {
       if (!current) current = 1
       if (!pageSize) pageSize = 10
 
-      const { sort, ...filter } = filters
-
+      const { sort, populate, fields, ...filter } = filters
+      const populateConfig = buildPopulateConfigFromStrings(populate, fields)
       const skip = (current - 1) * pageSize;
 
       const [totalItems, result] = await Promise.all([
@@ -50,10 +51,7 @@ export class RolesService {
           .skip(skip)
           .limit(pageSize)
           .sort(sort)
-          .populate({
-            path: 'permissions',
-            options: { lean: true },
-          })
+          .populate(populateConfig)
           .lean<Role[]>()
           .exec()
       ]);

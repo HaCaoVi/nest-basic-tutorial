@@ -7,6 +7,7 @@ import type { CompanyModelType } from './schemas/company.schema';
 import { Types } from 'mongoose';
 import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
+import { buildPopulateConfigFromStrings } from '@common/helpers/mongoose-populate.helper';
 
 @Injectable()
 export class CompaniesService {
@@ -30,8 +31,8 @@ export class CompaniesService {
       if (!current) current = 1
       if (!pageSize) pageSize = 10
 
-      const { sort, ...filter } = filters
-
+      const { sort, populate, fields, ...filter } = filters
+      const populateConfig = buildPopulateConfigFromStrings(populate, fields)
       const skip = (current - 1) * pageSize;
 
       const [totalItems, result] = await Promise.all([
@@ -41,11 +42,7 @@ export class CompaniesService {
           .skip(skip)
           .limit(pageSize)
           .sort(sort)
-          .populate({
-            path: 'createdBy',
-            select: '-password -refreshToken',
-            options: { lean: true },
-          })
+          .populate(populateConfig)
           .lean<Company[]>()
           .exec()
       ]);

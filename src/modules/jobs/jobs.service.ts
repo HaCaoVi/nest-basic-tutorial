@@ -8,6 +8,7 @@ import { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.
 import { Types } from 'mongoose';
 import { CompaniesService } from '@modules/companies/companies.service';
 import { normalizeFilters } from '@common/helpers/convert.helper';
+import { buildPopulateConfigFromStrings } from '@common/helpers/mongoose-populate.helper';
 @Injectable()
 export class JobsService {
   private readonly logger = new Logger(JobsService.name);
@@ -43,8 +44,8 @@ export class JobsService {
       if (!current) current = 1
       if (!pageSize) pageSize = 10
 
-      const { sort, ...filter } = filters
-
+      const { sort, populate, fields, ...filter } = filters
+      const populateConfig = buildPopulateConfigFromStrings(populate, fields)
       const skip = (current - 1) * pageSize;
 
       const [totalItems, result] = await Promise.all([
@@ -54,10 +55,7 @@ export class JobsService {
           .skip(skip)
           .limit(pageSize)
           .sort(sort)
-          .populate({
-            path: 'company',
-            options: { lean: true },
-          })
+          .populate(populateConfig)
           .lean<Job[]>()
           .exec()
       ]);

@@ -41,10 +41,13 @@ export class MulterConfigService implements MulterOptionsFactory {
             }),
 
             fileFilter: (req, file, callback) => {
-                if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
+                if (
+                    !file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/) &&
+                    !file.mimetype.match(/^application\/vnd.openxmlformats-officedocument.wordprocessingml.document$/)
+                ) {
                     return callback(
                         new UnprocessableEntityException(
-                            `Invalid file type '${file.mimetype}'. Allowed types: jpeg, png, gif, webp.`
+                            `Invalid file type '${file.mimetype}'. Allowed types: jpeg, png, gif, webp, docx.`
                         ),
                         false,
                     );

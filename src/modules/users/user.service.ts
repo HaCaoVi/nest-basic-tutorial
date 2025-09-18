@@ -10,6 +10,7 @@ import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/custo
 import { normalizeFilters } from '@common/helpers/convert.helper';
 import { RolesService } from '@modules/roles/roles.service';
 import { USER_ROLE } from '@modules/databases/sample';
+import { buildPopulateConfigFromStrings } from '@common/helpers/mongoose-populate.helper';
 
 @Injectable()
 export class UsersService {
@@ -92,8 +93,8 @@ export class UsersService {
       if (!current) current = 1
       if (!pageSize) pageSize = 10
 
-      const { sort, ...filter } = filters
-
+      const { sort, populate, fields, ...filter } = filters
+      const populateConfig = buildPopulateConfigFromStrings(populate, fields)
       const skip = (current - 1) * pageSize;
 
       const [totalItems, result] = await Promise.all([
@@ -103,10 +104,7 @@ export class UsersService {
           .skip(skip)
           .limit(pageSize)
           .sort(sort)
-          .populate({
-            path: 'company',
-            options: { lean: true },
-          })
+          .populate(populateConfig)
           .lean<User[]>()
           .exec()
       ]);
