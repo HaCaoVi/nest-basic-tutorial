@@ -37,7 +37,7 @@ export class User {
     company: mongoose.Schema.Types.ObjectId;
 
     @Prop({
-        required: true,
+        default: AccountType.LOCAL,
         enum: AccountType,
     })
     accountType: AccountType
