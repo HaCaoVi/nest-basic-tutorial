@@ -2,14 +2,20 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { PermissionsService } from './permissions.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { ResponseMessage, User } from '@common/decorators/customize.decorator';
+import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 
 @Controller('permissions')
 export class PermissionsController {
-  constructor(private readonly permissionsService: PermissionsService) {}
+  constructor(private readonly permissionsService: PermissionsService) { }
+
 
   @Post()
-  create(@Body() createPermissionDto: CreatePermissionDto) {
-    return this.permissionsService.create(createPermissionDto);
+  @ResponseMessage("Created Successfully")
+  create(
+    @User() user: IInfoDecodeToken,
+    @Body() createPermissionDto: CreatePermissionDto) {
+    return this.permissionsService.create(user, createPermissionDto);
   }
 
   @Get()
