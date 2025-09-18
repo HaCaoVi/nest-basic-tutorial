@@ -9,9 +9,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/jwt.strategy';
 import ms from 'ms';
 import { SecurityHelper } from '@common/helpers/security.helper';
+import { RolesModule } from '@modules/roles/roles.module';
 
 @Module({
   imports: [
+    RolesModule,
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({

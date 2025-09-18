@@ -9,6 +9,7 @@ export type RoleDocument = HydratedDocument<Role>;
 
 @Schema({ timestamps: true })
 export class Role {
+    _id: mongoose.Types.ObjectId
 
     @Prop({ required: true })
     name: string;

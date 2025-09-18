@@ -4,11 +4,11 @@ import { UsersController } from './user.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
-import { CompaniesModule } from '@modules/companies/companies.module';
+import { RolesModule } from '@modules/roles/roles.module';
 
 @Module({
   imports: [
-    CompaniesModule,
+    RolesModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [UsersController],

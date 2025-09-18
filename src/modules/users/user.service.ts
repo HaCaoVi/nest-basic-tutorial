@@ -8,7 +8,8 @@ import type { UserModelType } from './schemas/user.schema';
 import { SecurityHelper } from '@common/helpers/security.helper';
 import type { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
-import { CompaniesService } from '@modules/companies/companies.service';
+import { RolesService } from '@modules/roles/roles.service';
+import { USER_ROLE } from '@modules/databases/sample';
 
 @Injectable()
 export class UsersService {
@@ -17,12 +18,14 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: UserModelType,
     private securityHelper: SecurityHelper,
-    private companyService: CompaniesService,
+    private roleService: RolesService,
   ) { }
 
   async handleRegister(user: RegisterUserDto) {
     try {
       const { email, password } = user;
+
+      const normalRole = await this.roleService.findRoleByName(USER_ROLE);
 
       const isEmailExist = await this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL });
 
@@ -31,7 +34,7 @@ export class UsersService {
       }
 
       const hashPass = await this.securityHelper.hashBcrypt(password);
-      const newUser = await this.userModel.create({ ...user, password: hashPass, role: "USER", accountType: AccountType.LOCAL });
+      const newUser = await this.userModel.create({ ...user, password: hashPass, role: normalRole._id, accountType: AccountType.LOCAL });
       return {
         id: newUser._id,
         createdAt: newUser.createdAt
@@ -130,10 +133,16 @@ export class UsersService {
     try {
       const user = await this.userModel.findById(id)
         .select('-password -refreshToken')
-        .populate({
-          path: "role",
-          select: "_id name"
-        })
+        .populate([
+          {
+            path: "role",
+            select: "_id name"
+          },
+          {
+            path: "permission",
+            select: "_id name apiPath module method"
+          }
+        ])
         .lean<User>();
       if (!user) throw new NotFoundException(`User with id ${id} not found`);
       return user;

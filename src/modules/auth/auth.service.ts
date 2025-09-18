@@ -8,6 +8,7 @@ import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 import ms from 'ms';
+import { RolesService } from '@modules/roles/roles.service';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,9 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private securityHelper: SecurityHelper,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private roleService: RolesService
+
     ) { }
 
     async signAccessTokenJWT(payload: IInfoDecodeToken) {
@@ -43,16 +46,26 @@ export class AuthService {
     }
 
     async validateUser(username: string, pass: string): Promise<any> {
-        const user = await this.usersService.findUserByUsername(username);
+        const user = await this.usersService.findUserByUsername(username) as any;
         if (user) {
             const isValidPassword = await this.securityHelper.compareHashBcrypt(pass, user.password);
-            if (isValidPassword) return user
+            if (isValidPassword) {
+                const temp = await this.roleService.findOne(user.role._id)
+
+                const permissions = temp?.permissions ?? [];
+                const dataObject = { ...user.toObject(), permissions };
+
+                return {
+                    user: dataObject
+                };
+            }
         }
         return null;
     }
 
-    async login(user: IInfoDecodeToken, res: Response) {
-        const { _id, email, name, role } = user
+    async login(user: any, res: Response) {
+        const { _id, email, name, role, permissions } = user.user
+
         const payload = {
             sub: "Token login",
             iss: "From server",
@@ -75,7 +88,8 @@ export class AuthService {
                 _id,
                 email,
                 name,
-                role
+                role,
+                permissions
             }
         };
     }
@@ -98,11 +112,12 @@ export class AuthService {
                 _id,
                 email,
                 name,
-                role
+                role,
             };
 
             const newRefreshToken = await this.signRefreshTokenJWT(payload);
             const access_token = await this.signAccessTokenJWT(payload);
+            const temp = await this.roleService.findOne(role._id)
 
             await this.usersService.updateRefreshToken(_id, newRefreshToken);
             this.addRefreshTokenInCookie(res, newRefreshToken)
@@ -113,7 +128,8 @@ export class AuthService {
                     _id,
                     email,
                     name,
-                    role
+                    role,
+                    permissions: temp?.permissions ?? []
                 }
             };
         } catch (error) {

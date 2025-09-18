@@ -6,6 +6,7 @@ import { Role } from './schemas/role.schema';
 import type { RoleModelType } from './schemas/role.schema';
 import { IInfoDecodeToken, PaginatedResult } from '@common/interfaces/customize.interface';
 import { normalizeFilters } from '@common/helpers/convert.helper';
+import { ADMIN_ROLE } from '@modules/databases/sample';
 
 @Injectable()
 export class RolesService {
@@ -109,7 +110,7 @@ export class RolesService {
     try {
       const checkRole = await this.roleModel.findById(id);
 
-      if (checkRole?.name === "ADMIN") {
+      if (checkRole?.name === ADMIN_ROLE) {
         throw new BadRequestException("Can't delete role admin")
       }
 
@@ -123,5 +124,13 @@ export class RolesService {
       if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('Something went wrong!');
     }
+  }
+
+  async findRoleByName(name: string) {
+    const role = await this.roleModel
+      .findOne({ name })
+      .lean<Role>();
+    if (!role) throw new NotFoundException(`Role with name ${name} not found`);
+    return role;
   }
 }

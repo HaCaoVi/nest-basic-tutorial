@@ -1,6 +1,5 @@
 
 import { SoftDeleteModel } from '@common/interfaces/customize.interface';
-import { Company } from '@modules/companies/schemas/company.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 

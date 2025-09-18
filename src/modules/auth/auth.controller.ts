@@ -5,10 +5,14 @@ import { Cookies, Public, ResponseMessage, User } from '@common/decorators/custo
 import type { IInfoDecodeToken } from '@common/interfaces/customize.interface';
 import { RegisterUserDto } from '@modules/users/dto/create-user.dto';
 import type { Response } from 'express';
+import { RolesService } from '@modules/roles/roles.service';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private roleService: RolesService
+    ) { }
 
     @Public()
     @UseGuards(LocalAuthGuard)
@@ -30,12 +34,13 @@ export class AuthController {
 
     @Get('account')
     @ResponseMessage("User Information")
-    getProfile(
+    async getProfile(
         @User() user: IInfoDecodeToken,
     ) {
         const { _id, iat, exp, iss, ...userData } = user;
+        const temp = await this.roleService.findOne(userData.role._id)
         return {
-            user: userData
+            user: { ...userData, permissions: temp.permissions }
         };
     }
 
