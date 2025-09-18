@@ -8,6 +8,7 @@ export const buildPopulateConfigFromStrings = (
     populateStr: string,
     fieldsStr: string
 ): PopulateConfig[] => {
+    if (!populateStr) return []
     const paths = populateStr.split(",").map(p => p.trim()); // ["companyId","jobId"]
     const fieldsList = fieldsStr.split(",").map(f => f.trim());
     // ["companyId._id", "companyId.name", ...]

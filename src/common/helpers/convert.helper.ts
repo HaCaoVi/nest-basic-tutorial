@@ -3,17 +3,24 @@ export const normalizeFilters = (query: Record<string, any>) => {
 
     for (const [key, value] of Object.entries(query)) {
         if (typeof value === 'string') {
-            // check xem có đúng format regex /.../flags không
-            const regexMatch = value.match(/^\/(.+)\/([gimsuy]*)$/);
+            const regexMatch = value.match(/^\/(.*)\/([gimsuy]*)$/);
             if (regexMatch) {
-                filter[key] = new RegExp(regexMatch[1], regexMatch[2]); // -> regex
+                const pattern = regexMatch[1];
+                const flags = regexMatch[2];
+
+                // Nếu pattern rỗng (// hoặc //i ...) => bỏ qua filter này
+                if (pattern.trim() === '') {
+                    continue;
+                }
+
+                filter[key] = new RegExp(pattern, flags);
             } else {
-                filter[key] = value; // string thường
+                filter[key] = value;
             }
         } else {
-            filter[key] = value; // giữ nguyên (number, boolean...)
+            filter[key] = value;
         }
     }
 
     return filter;
-}
+};

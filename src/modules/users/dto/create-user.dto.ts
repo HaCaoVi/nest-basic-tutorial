@@ -2,9 +2,9 @@ import { IsObjectId } from '@common/decorators/validate.decorator';
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, Max, Min, MinLength } from 'class-validator';
 
 export enum Gender {
-    Male = 'Male',
-    Female = 'Female',
-    Other = 'Other',
+    Male = 'MALE',
+    Female = 'FEMALE',
+    Other = 'OTHER',
 }
 
 export class CreateUserDto {
@@ -32,7 +32,7 @@ export class CreateUserDto {
     address: string;
 
     @IsNotEmpty({ message: 'Company must not be empty!' })
-    @IsObjectId({ message: 'Company must be a ObjectId!' })
+    // @IsObjectId({ message: 'Company must be a ObjectId!' })
     company: string;
 
     @IsNotEmpty({ message: 'Role must not be empty!' })

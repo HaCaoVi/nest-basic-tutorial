@@ -49,7 +49,7 @@ export class UsersService {
 
   async create(user: IInfoDecodeToken, createUserDto: CreateUserDto) {
     try {
-      const { email, password, ...rest } = createUserDto
+      const { email, password, company, ...rest }: any = createUserDto
 
       const [isEmailExist] = await Promise.all([
         this.userModel.exists({ email, isDeleted: false, accountType: AccountType.LOCAL }),
@@ -59,7 +59,7 @@ export class UsersService {
         throw new BadRequestException("Email already exists!");
       }
       const hashPass = await this.securityHelper.hashBcrypt(password);
-      const newUser = await this.userModel.create({ ...rest, email, password: hashPass, role: "ADMIN", accountType: AccountType.LOCAL, createdBy: user._id })
+      const newUser = await this.userModel.create({ ...rest, email, company: company._id, password: hashPass, accountType: AccountType.LOCAL, createdBy: user._id })
 
       return {
         id: newUser._id,
